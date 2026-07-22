@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 // Use your Cloudflare Pages URL (e.g. https://kenny-blog.pages.dev)
 // or your custom domain (e.g. https://kennywrites.com).
 // RSS and sitemap.xml need it to generate correct absolute links.
-const SITE_URL = 'https://kenny-blog.pages.dev';
+const SITE_URL = 'https://kenny-blog-39e.pages.dev';
 
 export default defineConfig({
   site: SITE_URL,
