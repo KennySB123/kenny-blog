@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import { getPosts, groupByYear } from '../utils/posts';
+
+const posts = await getPosts();
+const years = groupByYear(posts);
+---
+
+<BaseLayout title="Archive" description="Every post, by year." noSearch>
+  <h1>Archive</h1>
+  <p style="color:var(--text-muted);max-width:52ch">
+    Everything, oldest at the bottom.
+  </p>
+
+  {years.map(([year, yearPosts]) => (
+    <section>
+      <h2 class="archive-year">{year}</h2>
+      <ul class="archive-list">
+        {yearPosts.map((post) => (
+          <li>
+            <FormattedDate date={post.data.pubDate} short />
+            <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</BaseLayout>

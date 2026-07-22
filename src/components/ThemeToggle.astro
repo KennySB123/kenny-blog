@@ -1,0 +1,47 @@
+---
+// Dark mode toggle. Respects the OS preference by default,
+// remembers a manual override in localStorage.
+---
+
+<button
+  class="theme-toggle"
+  id="theme-toggle"
+  type="button"
+  aria-label="Toggle dark mode"
+  title="Toggle dark mode"
+>
+  <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.5"></circle>
+    <path d="M12 1.5v2M12 20.5v2M4 4l1.5 1.5M18.5 18.5L20 20M1.5 12h2M20.5 12h2M4 20l1.5-1.5M18.5 5.5L20 4"></path>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"></path>
+  </svg>
+</button>
+
+<script is:inline>
+  (function () {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+
+    function current() {
+      return document.documentElement.getAttribute('data-theme') || 'light';
+    }
+
+    btn.addEventListener('click', function () {
+      const next = current() === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try {
+        localStorage.setItem('theme', next);
+      } catch (e) {}
+      // Keep the Giscus comment iframe in sync, if it's on the page.
+      const frame = document.querySelector('iframe.giscus-frame');
+      if (frame && frame.contentWindow) {
+        frame.contentWindow.postMessage(
+          { giscus: { setConfig: { theme: next === 'dark' ? 'dark' : 'light' } } },
+          'https://giscus.app'
+        );
+      }
+    });
+  })();
+</script>

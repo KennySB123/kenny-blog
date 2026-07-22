@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getTags } from '../../utils/posts';
+
+const tags = await getTags();
+---
+
+<BaseLayout title="Tags" description="Browse posts by topic." noSearch>
+  <h1>Tags</h1>
+  <p style="color:var(--text-muted);max-width:52ch">
+    {tags.length} {tags.length === 1 ? 'tag' : 'tags'} in use. Bigger number, more posts.
+  </p>
+
+  {tags.length === 0 ? (
+    <p>No tags yet — add some to a post's frontmatter.</p>
+  ) : (
+    <ul class="tag-list" style="margin-top:2rem;gap:0.6rem">
+      {tags.map(({ tag, count }) => (
+        <li>
+          <a class="tag" data-size="lg" href={`/tags/${tag}/`}>
+            #{tag} <span style="opacity:.65">{count}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
+</BaseLayout>

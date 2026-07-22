@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+
+# Update the hostname to match your site
+Sitemap: https://kenny-blog.pages.dev/sitemap-index.xml

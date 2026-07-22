@@ -1,0 +1,82 @@
+---
+import { SITE } from '../consts';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Set to true on pages you don't want indexed by Pagefind search */
+  noSearch?: boolean;
+}
+
+const {
+  title,
+  description = SITE.description,
+  noSearch = false,
+} = Astro.props;
+
+const pageTitle = title ? `${title} · ${SITE.title}` : SITE.title;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang={SITE.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={SITE.title} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={SITE.title}
+      href={new URL('rss.xml', Astro.site)}
+    />
+
+    <!-- Fonts: Fraunces (display, has playful SOFT + WONK axes) + Nunito (body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..800,0..100,0..1&family=Nunito:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Set the theme before first paint so there's no white flash -->
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = stored || (prefersDark ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <main id="main" data-pagefind-body={noSearch ? undefined : true}>
+      <div class="container">
+        <slot />
+      </div>
+    </main>
+    <Footer />
+  </body>
+</html>

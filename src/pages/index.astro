@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import { SITE } from '../consts';
+import { getPosts, getTags } from '../utils/posts';
+
+const posts = await getPosts();
+const recent = posts.slice(0, 6);
+const tags = (await getTags()).slice(0, 8);
+---
+
+<BaseLayout noSearch>
+  <section class="hero">
+    <h1>Hey, I'm {SITE.author} <span class="wave">👋</span></h1>
+    <p>{SITE.tagline}</p>
+  </section>
+
+  <div class="section-head">
+    <h2>Recent writing</h2>
+    {posts.length > recent.length && <a href="/blog">See all {posts.length} posts →</a>}
+  </div>
+
+  {recent.length === 0 ? (
+    <p>
+      No posts yet. Add a Markdown file to <code>src/content/blog/</code> — or open
+      <a href="/admin/">/admin</a> and write one in the browser.
+    </p>
+  ) : (
+    <ul class="card-grid">
+      {recent.map((post) => <PostCard post={post} />)}
+    </ul>
+  )}
+
+  {tags.length > 0 && (
+    <>
+      <div class="section-head">
+        <h2>Browse by tag</h2>
+        <a href="/tags">All tags →</a>
+      </div>
+      <ul class="tag-list">
+        {tags.map(({ tag, count }) => (
+          <li>
+            <a class="tag" data-size="lg" href={`/tags/${tag}/`}>#{tag} <span style="opacity:.65">{count}</span></a>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+</BaseLayout>

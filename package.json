@@ -1,0 +1,18 @@
+{
+  "name": "kenny-blog",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && pagefind --site dist",
+    "preview": "npm run build && astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.11",
+    "@astrojs/sitemap": "^3.2.1",
+    "astro": "^5.2.5",
+    "pagefind": "^1.3.0"
+  }
+}

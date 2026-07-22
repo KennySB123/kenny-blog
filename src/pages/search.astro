@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Search" description="Search everything on the site." noSearch>
+  <h1>Search</h1>
+
+  <div id="search" style="margin-top:1.5rem"></div>
+
+  <p class="search-fallback" id="search-fallback" hidden>
+    <strong>Search index not built yet.</strong> Pagefind generates its index during
+    <code>npm run build</code>, so search doesn't work in <code>npm run dev</code>.
+    Run <code>npm run preview</code> to try it locally — it works fine on the live site.
+  </p>
+
+  <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+  <script is:inline src="/pagefind/pagefind-ui.js" onerror="document.getElementById('search-fallback').hidden = false"></script>
+  <script is:inline>
+    window.addEventListener('load', function () {
+      if (typeof PagefindUI === 'undefined') {
+        var el = document.getElementById('search-fallback');
+        if (el) el.hidden = false;
+        return;
+      }
+      new PagefindUI({
+        element: '#search',
+        showSubResults: true,
+        showImages: false,
+        excerptLength: 25,
+      });
+    });
+  </script>
+</BaseLayout>

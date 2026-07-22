@@ -1,0 +1,30 @@
+---
+import { SITE, NAV } from '../consts';
+import ThemeToggle from './ThemeToggle.astro';
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+
+function isCurrent(href: string) {
+  if (href === '/') return path === '/';
+  return path === href || path.startsWith(href + '/');
+}
+---
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="brand">
+      <span class="brand-dot" aria-hidden="true"></span>
+      {SITE.title}
+    </a>
+
+    <nav class="nav" aria-label="Main">
+      {NAV.map((item) => (
+        <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+          {item.label}
+        </a>
+      ))}
+    </nav>
+
+    <ThemeToggle />
+  </div>
+</header>

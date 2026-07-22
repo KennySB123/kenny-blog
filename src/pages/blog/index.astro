@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getPosts } from '../../utils/posts';
+
+const posts = await getPosts();
+---
+
+<BaseLayout title="Writing" description="Everything I've written, newest first." noSearch>
+  <h1>Writing</h1>
+  <p style="color:var(--text-muted);max-width:52ch">
+    {posts.length} {posts.length === 1 ? 'post' : 'posts'}, newest first.
+    There's also an <a href="/archive">archive view</a> and an <a href="/rss.xml">RSS feed</a>.
+  </p>
+
+  <ul class="card-grid" style="margin-top:2rem">
+    {posts.map((post) => <PostCard post={post} />)}
+  </ul>
+</BaseLayout>

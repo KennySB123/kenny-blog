@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, SOCIALS } from '../consts';
+---
+
+<BaseLayout title="About" description={`About ${SITE.author}.`}>
+  <h1>About</h1>
+
+  <div class="prose">
+    <p>
+      <span class="highlight">Replace this with your actual bio.</span> This page is a plain
+      Astro file — edit <code>src/pages/about.astro</code> and write whatever you like.
+      HTML works, and so does everything in the design system.
+    </p>
+
+    <p>
+      A few paragraphs about who you are and why you're writing tends to do more work
+      than anything else on a personal site. It's the page people check before deciding
+      whether to subscribe.
+    </p>
+
+    <h2>Find me elsewhere</h2>
+    <ul>
+      {SOCIALS.map((s) => <li><a href={s.href}>{s.label}</a></li>)}
+    </ul>
+
+    <h2>Follow along</h2>
+    <p>
+      Grab the <a href="/rss.xml">RSS feed</a> if you use a reader.
+    </p>
+  </div>
+</BaseLayout>

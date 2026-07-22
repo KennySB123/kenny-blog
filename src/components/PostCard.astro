@@ -1,0 +1,26 @@
+---
+import FormattedDate from './FormattedDate.astro';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+}
+const { post } = Astro.props;
+const { title, description, pubDate, tags, draft } = post.data;
+---
+
+<li class="card">
+  <span class="card-meta">
+    <FormattedDate date={pubDate} />
+    {draft && <span class="draft-badge">Draft</span>}
+  </span>
+  <h2><a href={`/blog/${post.id}/`}>{title}</a></h2>
+  <p>{description}</p>
+  {tags.length > 0 && (
+    <ul class="tag-list">
+      {tags.map((tag) => (
+        <li><a class="tag" href={`/tags/${tag}/`}>#{tag}</a></li>
+      ))}
+    </ul>
+  )}
+</li>
