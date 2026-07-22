@@ -8,7 +8,7 @@
 
 backend:
   name: github
-  repo: YOUR-USERNAME/YOUR-REPO # ← change this
+  repo: KennySB123/kenny-blog # ← change this
   branch: main
   # Lets you log in with GitHub without running your own auth server.
   base_url: https://sveltia-cms-auth.YOUR-SUBDOMAIN.workers.dev # ← see DEPLOY.md step 5b

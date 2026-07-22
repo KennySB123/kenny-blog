@@ -25,8 +25,7 @@ export const NAV = [
 
 export const SOCIALS = [
   // Delete any you don't want; add your own.
-  { href: 'https://github.com/YOUR-USERNAME', label: 'GitHub' },
-  { href: 'https://bsky.app/profile/YOUR-HANDLE', label: 'Bluesky' },
+  { href: 'https://github.com/KennySB123', label: 'GitHub' },
   { href: 'mailto:kennysweeneybaird1@gmail.com', label: 'Email' },
 ];
 
