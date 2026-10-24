@@ -257,6 +257,15 @@ When you want uploads to go public directly, request the free audit at
    GitHub Actions (about 10 to 20 minutes) and uploads to YouTube. Once it is public, it is
    embedded at the top of the essay.
 
+**You can't lose your writing.** While you type, the Studio keeps a version every few
+seconds in the browser, plus one on every save, publish, discard and delete. Open
+**Settings → History** to see, restore or download any version. The **Backups** tab lists every
+essay with history, including deleted and never-saved ones, and can recover them. In Chrome or
+Edge on a computer, choose a **backup folder** there (put it in Dropbox, iCloud Drive or
+OneDrive to copy it off the machine): each essay is then written to a `.md` file as you type,
+with timestamped copies in `history/`. After a browser restart, click **Resume folder backup**
+once.
+
 Shortcuts: **Ctrl/Cmd+S** save, **Ctrl/Cmd+Shift+P** preview, **Ctrl/Cmd+B / I / K** bold,
 italic, link, **Esc** close panels.
 

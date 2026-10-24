@@ -7,14 +7,14 @@ export const session: { viewer: Viewer | null; logout: () => void } = {
 };
 
 /** Top bar used by the list, settings and activity screens. */
-export function topbar(active: 'posts' | 'settings' | 'activity') {
+export function topbar(active: 'posts' | 'settings' | 'activity' | 'backups') {
   const link = (href: string, id: typeof active, label: string) =>
     h('a', { href, class: 'tab', 'aria-current': active === id ? 'page' : undefined }, label);
   return h(
     'header',
     { class: 'studio-top' },
     h('a', { class: 'studio-brand', href: '#/' }, h('span', { class: 'brand-dot', 'aria-hidden': 'true' }), 'Studio'),
-    h('nav', { class: 'studio-tabs', 'aria-label': 'Studio' }, link('#/', 'posts', 'Essays'), link('#/settings', 'settings', 'Distribution'), link('#/activity', 'activity', 'Activity')),
+    h('nav', { class: 'studio-tabs', 'aria-label': 'Studio' }, link('#/', 'posts', 'Essays'), link('#/settings', 'settings', 'Distribution'), link('#/activity', 'activity', 'Activity'), link('#/backups', 'backups', 'Backups')),
     h(
       'div',
       { class: 'studio-user' },

@@ -9,6 +9,10 @@ import { PLATFORMS, PLATFORM_INFO, type PlatformSettings } from '../platforms';
 import { renderMarkdown } from '../preview';
 import { uploadImage } from '../images';
 import { distributionPanel } from './distribution';
+import { historyPanel } from './history';
+import { snapshot, rekey, stamp, downloadText, type VersionReason } from '../backup';
+import { folderStatus, folderName, resumeFolder, writeLive, writeHistory, onFolderChange } from '../folder';
+import { AUTORESTORE_KEY } from './backups';
 import { countWords, readingMinutes } from '../../utils/reading';
 
 const FONTS = ['serif', 'sans', 'mono'] as const;
@@ -57,6 +61,7 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
   };
   let committed: string | null = existing ? serializePost(existing.data, existing.body) : null;
   let localKey = `studio:draft:${slug ?? '__new__'}`;
+  let backupKey = slug ?? '__new__';
   let saving = false;
 
   // ── Elements ────────────────────────────────────────────────
@@ -65,6 +70,7 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
   const previewEl = h('article', { class: 'ed-preview prose', hidden: true });
   const countEl = h('span', {});
   const stateEl = h('span', { class: 'ed-state' });
+  const backupEl = h('span', { class: 'ed-backup' });
   const banner = h('div', { class: 'ed-banner', hidden: true });
   const saveBtn = h('button', { class: 'btn', type: 'button', onclick: () => save({}) }, 'Save');
   const publishBtn = h('button', { class: 'btn btn-primary', type: 'button', onclick: () => save({ publish: true }) }, 'Publish');
@@ -79,11 +85,12 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
   const drawerSave = h('button', { class: 'btn', type: 'button', onclick: () => save({}) }, 'Save');
   const drawerPublish = h('button', { class: 'btn btn-primary', type: 'button', onclick: () => save({ publish: true }) }, 'Publish');
   const drawer = h('aside', { class: 'drawer', 'aria-label': 'Essay settings', hidden: true });
-  const tabs = { details: h('div', { class: 'stack' }), distribution: h('div', {}) };
+  const tabs = { details: h('div', { class: 'stack' }), distribution: h('div', {}), history: h('div', { class: 'stack-sm' }) };
   let activeTab: keyof typeof tabs = 'details';
   const tabBtns = {
     details: h('button', { class: 'tab', type: 'button', onclick: () => showTab('details') }, 'Details'),
     distribution: h('button', { class: 'tab', type: 'button', onclick: () => showTab('distribution') }, 'Distribution'),
+    history: h('button', { class: 'tab', type: 'button', onclick: () => showTab('history') }, 'History'),
   };
   const dist = distributionPanel({
     slug: () => doc.slug,
@@ -97,15 +104,53 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
   });
   tabs.distribution.appendChild(dist.el);
 
+  const hist = historyPanel({
+    key: () => backupKey,
+    fileBase: () => doc.slug ?? 'new-essay',
+    restoreLabel: 'Restore this version',
+    onRestore: async (v) => {
+      // Keep what is on screen now, then swap in the old version straight away.
+      const before = { title: titleEl.value, body: bodyEl.value, data: JSON.parse(JSON.stringify(doc.data)) };
+      const kept = snapshot(backupKey, before, 'before-restore').catch(() => false);
+      doc.data = JSON.parse(JSON.stringify(v.data));
+      titleEl.value = v.title;
+      bodyEl.value = v.body;
+      grow(titleEl);
+      grow(bodyEl);
+      changed();
+      await kept;
+      hist.render();
+      toast(`Restored the version from ${new Date(v.at).toLocaleString('en-GB')}. ${doc.path ? 'Save to put it on the site.' : ''}`, 'ok', 6000);
+    },
+  });
+  tabs.history.append(
+    h(
+      'p',
+      { class: 'hint' },
+      'Every few seconds while you write, and on every save, a version is kept in this browser. ',
+      h('a', { href: '#/backups' }, 'Backup settings')
+    ),
+    h(
+      'button',
+      {
+        class: 'btn btn-small',
+        type: 'button',
+        onclick: () => downloadText(`${doc.slug ?? 'new-essay'}-${stamp(Date.now())}.md`, current()),
+      },
+      'Download the current text as .md'
+    ),
+    hist.el
+  );
+
   clear(
     drawer,
     h(
       'div',
       { class: 'drawer-head' },
-      h('div', { class: 'tabs' }, tabBtns.details, tabBtns.distribution),
+      h('div', { class: 'tabs' }, tabBtns.details, tabBtns.distribution, tabBtns.history),
       h('button', { class: 'btn btn-ghost', type: 'button', 'aria-label': 'Close', onclick: () => closeDrawer() }, '✕')
     ),
-    h('div', { class: 'drawer-body' }, tabs.details, tabs.distribution),
+    h('div', { class: 'drawer-body' }, tabs.details, tabs.distribution, tabs.history),
     h('div', { class: 'drawer-foot' }, drawerSave, drawerPublish)
   );
 
@@ -116,6 +161,7 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
       tabBtns[k].setAttribute('aria-current', k === t ? 'page' : 'false');
     }
     if (t === 'details') renderDetails();
+    else if (t === 'history') hist.render();
     else dist.render();
   }
   function openDrawer(t: keyof typeof tabs = activeTab) {
@@ -299,7 +345,7 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
     ),
     banner,
     h('main', { class: 'ed-page' }, titleEl, bodyEl, previewEl),
-    h('footer', { class: 'ed-bar ed-bottom' }, countEl, h('span', { class: 'ed-spacer' }), stateEl),
+    h('footer', { class: 'ed-bar ed-bottom' }, countEl, h('span', { class: 'ed-spacer' }), backupEl, stateEl),
     drawer
   );
   clear(root, rootEl);
@@ -322,6 +368,8 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
   let localTimer: number | undefined;
   function changed() {
     updateChrome();
+    pendingSnapshot = true;
+    scheduleFolder();
     clearTimeout(localTimer);
     localTimer = window.setTimeout(() => {
       if (isDirty()) writeLocal(localKey, { title: titleEl.value, body: bodyEl.value, data: doc.data, savedAt: Date.now(), baseSha: doc.sha });
@@ -346,6 +394,98 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
     drawerSave.disabled = saveBtn.disabled;
     document.title = `${titleEl.value || 'Untitled'} · Studio`;
   }
+
+  // ── Backups ─────────────────────────────────────────────────
+  // 1. Version history in IndexedDB: every SNAPSHOT_MS while changing, and on milestones.
+  // 2. Live file + timestamped copies in a folder on disk, if the user chose one.
+  const SNAPSHOT_MS = 8000;
+  const FOLDER_HISTORY_MS = 5 * 60 * 1000;
+  let pendingSnapshot = false;
+  let lastBackup = 0;
+  let backupError = '';
+  let lastFolderHistory = 0;
+  let folderTimer: number | undefined;
+  let folderDirty = false;
+  const fileBase = () => doc.slug ?? 'new-essay';
+
+  function content() {
+    return { title: titleEl.value, body: bodyEl.value, data: doc.data };
+  }
+
+  async function backupNow(reason: VersionReason = 'typing') {
+    pendingSnapshot = false;
+    try {
+      await snapshot(backupKey, content(), reason);
+      lastBackup = Date.now();
+      backupError = '';
+    } catch (e) {
+      if (!backupError) toast(`Could not back up in this browser: ${errorMessage(e)}. Use History → Download to keep a copy.`, 'error', 8000);
+      backupError = errorMessage(e);
+    }
+    if (reason !== 'typing' && reason !== 'opened') await flushFolder(true);
+    renderBackup();
+  }
+
+  function scheduleFolder() {
+    folderDirty = true;
+    clearTimeout(folderTimer);
+    folderTimer = window.setTimeout(() => flushFolder(false), 1500);
+  }
+
+  async function flushFolder(milestone: boolean) {
+    clearTimeout(folderTimer);
+    if (folderStatus() !== 'granted') return;
+    if (!folderDirty && !milestone) return;
+    folderDirty = false;
+    const text = current();
+    if (!titleEl.value.trim() && !bodyEl.value.trim()) return;
+    await writeLive(fileBase(), text);
+    if (milestone || Date.now() - lastFolderHistory > FOLDER_HISTORY_MS) {
+      lastFolderHistory = Date.now();
+      await writeHistory(fileBase(), stamp(Date.now()), text);
+    }
+    renderBackup();
+  }
+
+  function renderBackup() {
+    const st = folderStatus();
+    const parts: (Node | string)[] = [];
+    if (backupError) parts.push(h('span', { class: 'ed-backup-error' }, 'Browser backup failed'));
+    else if (lastBackup) parts.push(`Backed up ${new Date(lastBackup).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`);
+    if (st === 'granted') parts.push(folderName() ? ` · folder "${folderName()}"` : ' · backup folder');
+    if (st === 'prompt' || st === 'denied')
+      parts.push(
+        ' · ',
+        h(
+          'button',
+          {
+            class: 'linklike',
+            type: 'button',
+            onclick: async () => {
+              if (await resumeFolder()) {
+                await flushFolder(true);
+                toast('Folder backup is on again.', 'ok');
+              }
+            },
+          },
+          'Resume folder backup'
+        )
+      );
+    clear(backupEl, ...parts);
+    backupEl.hidden = parts.length === 0;
+  }
+
+  const snapshotTimer = window.setInterval(() => {
+    if (pendingSnapshot) backupNow('typing');
+  }, SNAPSHOT_MS);
+  const offFolder = onFolderChange(renderBackup);
+  const onHide = (e: Event) => {
+    if (document.visibilityState === 'hidden' || e.type === 'pagehide') {
+      if (isDirty()) writeLocal(localKey, { title: titleEl.value, body: bodyEl.value, data: doc.data, savedAt: Date.now(), baseSha: doc.sha });
+      if (pendingSnapshot) backupNow('typing');
+      flushFolder(false);
+    }
+  };
 
   // Focus mode: hide chrome while typing.
   let idleTimer: number | undefined;
@@ -485,7 +625,12 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
       if (isNew) {
         localKey = `studio:draft:${doc.slug}`;
         history.replaceState(null, '', `#/edit/${encodeURIComponent(doc.slug!)}`);
+        try {
+          await rekey('__new__', doc.slug!);
+        } catch {}
+        backupKey = doc.slug!;
       }
+      await backupNow(verb === 'Publish' ? 'published' : 'saved');
       toast(
         verb === 'Publish'
           ? store.settings.trigger === 'on-publish'
@@ -519,6 +664,7 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
       checkboxes: live.map((p) => ({ id: p, label: p === 'youtube' ? 'Also delete the YouTube video' : `Also remove the copy on ${PLATFORM_INFO[p].label}` })),
     });
     if (choice === null) return;
+    await backupNow('deleted');
     try {
       if (choice.length) await dispatchDistribute({ slug: doc.slug, action: 'remove', platforms: choice.join(',') });
       const job = store.jobs.get(doc.slug);
@@ -568,16 +714,32 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
         {
           class: 'btn btn-small',
           type: 'button',
-          onclick: () => {
+          onclick: async () => {
+            try {
+              await snapshot(backupKey, { title: local.title, body: local.body, data: local.data }, 'discarded');
+            } catch {}
             dropLocal(localKey);
             banner.hidden = true;
+            toast('Discarded. The discarded text is still in Settings → History.', 'ok');
           },
         },
         'Discard'
       )
     );
     banner.hidden = false;
+    // Coming from Backups → "Recover as a new essay": apply it straight away.
+    try {
+      if (sessionStorage.getItem(AUTORESTORE_KEY)) {
+        sessionStorage.removeItem(AUTORESTORE_KEY);
+        (banner.querySelector('.btn-primary') as HTMLButtonElement | null)?.click();
+        toast('Recovered. Give it a look, then save it.', 'ok');
+      }
+    } catch {}
   }
+
+  // Keep the GitHub version as it was when opened, in case it is overwritten later.
+  if (existing) snapshot(backupKey, { title: existing.data.title, body: existing.body, data: existing.data }, 'opened').catch(() => {});
+  renderBackup();
 
   // ── Events ──────────────────────────────────────────────────
   titleEl.addEventListener('input', () => {
@@ -646,6 +808,8 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
   window.addEventListener('keydown', onKey);
   window.addEventListener('mousemove', onMove);
   window.addEventListener('beforeunload', onUnload);
+  document.addEventListener('visibilitychange', onHide);
+  window.addEventListener('pagehide', onHide);
 
   requestAnimationFrame(() => {
     grow(titleEl);
@@ -656,7 +820,12 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
 
   return () => {
     clearTimeout(localTimer);
+    clearInterval(snapshotTimer);
+    offFolder();
     if (isDirty()) writeLocal(localKey, { title: titleEl.value, body: bodyEl.value, data: doc.data, savedAt: Date.now(), baseSha: doc.sha });
+    backupNow('closed');
+    document.removeEventListener('visibilitychange', onHide);
+    window.removeEventListener('pagehide', onHide);
     window.removeEventListener('keydown', onKey);
     window.removeEventListener('mousemove', onMove);
     window.removeEventListener('beforeunload', onUnload);

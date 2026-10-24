@@ -10,6 +10,9 @@ import { editorView } from './views/editor';
 import { settingsView } from './views/settings';
 import { videoView } from './views/video';
 import { activityView } from './views/activity';
+import { backupsView } from './views/backups';
+import { initFolder } from './folder';
+import { persistStorage } from './backup';
 
 const root = document.getElementById('app')!;
 let cleanup: (() => void) | void;
@@ -36,6 +39,9 @@ function route() {
     case 'activity':
       cleanup = activityView(root);
       break;
+    case 'backups':
+      cleanup = backupsView(root);
+      break;
     default:
       listView(root);
   }
@@ -58,7 +64,7 @@ async function boot() {
     session.viewer = await getViewer();
     session.logout = () => logout();
     if (!(await canPush())) return logout(`@${session.viewer.login} cannot write to ${OWNER}/${NAME}.`);
-    await refresh();
+    await Promise.all([refresh(), initFolder().catch(() => {}), persistStorage()]);
   } catch (e) {
     if (e instanceof GitHubError && (e.status === 401 || e.status === 403)) {
       return logout(auth.kind === 'oauth' ? 'Your login expired. Log in again.' : `That token was refused: ${e.message}`);

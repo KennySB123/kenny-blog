@@ -70,7 +70,12 @@ Around the site:
   the branch moved). `updateJson()` does read-modify-write for shared JSON files.
 - Login: `/api/auth/login` → GitHub → `/api/auth/callback` → `/admin/#token=…`. The token is
   kept in `localStorage`. A fine-grained PAT works too (local dev, previews).
-- Unsaved text is autosaved to `localStorage` under `studio:draft:<slug>`.
+- Unsaved text is autosaved to `localStorage` under `studio:draft:<slug>` (the working copy).
+- Backups (`backup.ts`, `folder.ts`, `views/history.ts`, `views/backups.ts`): IndexedDB keeps a
+  version every 8 s while typing and on every save/publish/discard/restore/delete (keyed by
+  slug, `__new__` before the first save, re-keyed after). Optional folder backup via the File
+  System Access API writes `<slug>.md` live and `history/<slug>/<stamp>.md` copies. Never
+  delete versions on behalf of the user except the pruning of old typing snapshots.
 
 ## Pipeline (`pipeline/`)
 
