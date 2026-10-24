@@ -70,7 +70,9 @@ function apply(change) {
  * @param {{ ledger?: ((l:any)=>void)[], files?: Record<string,string|null> }} change
  */
 export function persist(change, message) {
-  if (!IN_CI || DRY_RUN) {
+  // A dry run must leave the repository exactly as it was.
+  if (DRY_RUN) return false;
+  if (!IN_CI) {
     apply(change);
     return false;
   }
