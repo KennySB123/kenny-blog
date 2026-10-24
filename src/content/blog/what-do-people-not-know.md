@@ -21,10 +21,10 @@ Society was of course not perfect before, racism was embedded in America's cultu
 
 Bridging this gap seems to be one of the more important questions of our time, but the solution cannot just be averaging the extremes of opinion. This is where most of the danger seems to lie, both sides can simply say. "I am right, they should share my views" and inevitably nothing and no one changes. Maybe beliefs becoming core to tribal identity is the issue, since they, unlike facts (or the closest we have to them epistemically), can be contradictory. It's not surprising that allowing unsubstantiated beliefs to become social currency has done so much harm to social cohesion. When people are arguing about any given issue, especially online, the goal is usually closer to 'winning' than 'reaching a shared understanding' or even worse, *changing your mind*. 
 
-I definitely enjoyed trying to approach this from first principles, but even  the most clear understanding of the problem, is insufficient without action. At least now I think some prerequisites needed to bridge people's beliefs and knowledge are more clear.
+I definitely enjoyed trying to approach this from first principles, but even the most clear understanding of the problem, is insufficient without action. At least now I think some prerequisites needed to bridge people's beliefs and knowledge are more clear.
 
 1. Making it safe to change your view - detribalising beliefs, or creating a new tribe for people making this change
 2. Creating forums of debate that include facts, information, and research that are not curated for a particular view point
 3. Facts, information, and research presented are as objectively correct as possible, and can be verified by both sides
 
-This may still be insufficient, but widespread debate following these principles would probably be very helpful. Research like the Perception gap project have
+This may still be insufficient, but widespread debate following these principles would be a huge improvement on the status quo. Research like the 'Perception gap project' have shown people tend to overestimate the degree to which their views differ. Presumably this is thanks to the bedrock of views that go even deeper than what society teaches, like the desires for health, happiness, personal and familial success. While we still share these dreams, I'm hopeful that we can find a way to bridge the gap and agree on a way to achieve them.
