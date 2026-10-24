@@ -3,6 +3,8 @@
    The writing screen is deliberately plain, like blank.page.
    ═══════════════════════════════════════════════════════════ */
 
+html:has(body.studio) { scroll-behavior: auto; }
+
 body.studio {
   background-image: none;
   display: block;
@@ -480,3 +482,53 @@ textarea.input { resize: vertical; line-height: 1.5; }
 .backup-item[open] summary { margin-bottom: 0.8rem; }
 .plain-list { margin: 0; padding-left: 1.2rem; }
 .plain-list li { margin: 0.25rem 0; }
+
+/* ── Zen mode: only the words ─────────────────────────────── */
+
+.ed.zen .ed-bar,
+.ed.zen .ed-banner,
+.ed.zen .drawer { display: none !important; }
+.ed.zen .ed-page { padding-top: 14vh; padding-bottom: 40vh; }
+.ed.zen .ed-title::placeholder,
+.ed.zen .ed-body::placeholder { color: transparent; }
+html.zen-root .toast-ok, html.zen-root .toast-info { display: none; }
+html.zen-root { scrollbar-width: none; }
+html.zen-root::-webkit-scrollbar { display: none; }
+
+.zen-hint {
+  position: fixed;
+  left: 50%;
+  bottom: 2rem;
+  transform: translateX(-50%);
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  background: var(--bg-sunken);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+  z-index: 30;
+}
+.zen-hint.show { opacity: 1; }
+
+/* Phones and tablets have no Esc key, so they get a faint way out. */
+.zen-exit { display: none; }
+@media (hover: none) {
+  .ed.zen .zen-exit {
+    display: grid;
+    place-items: center;
+    position: fixed;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--border);
+    font-size: 1.1rem;
+    z-index: 30;
+  }
+}

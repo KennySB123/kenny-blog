@@ -6,6 +6,7 @@ import { store } from '../state';
 import { commit, dispatchDistribute } from '../github';
 import { PATHS } from '../config';
 import { effective } from '../platforms';
+import { autosize } from '../autosize';
 
 const STATUS_TEXT: Record<string, string> = {
   generating: 'Claude is writing the script',
@@ -73,10 +74,7 @@ export function videoView(root: HTMLElement, slug: string): () => void {
     info.textContent = `${words.toLocaleString('en-GB')} words · about ${Math.max(1, Math.round(mins))} min of video`;
   }
 
-  const grow = () => {
-    scriptEl.style.height = 'auto';
-    scriptEl.style.height = `${scriptEl.scrollHeight}px`;
-  };
+  const grow = () => autosize(scriptEl);
   scriptEl.addEventListener('input', () => {
     grow();
     updateInfo();

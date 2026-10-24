@@ -266,8 +266,12 @@ OneDrive to copy it off the machine): each essay is then written to a `.md` file
 with timestamped copies in `history/`. After a browser restart, click **Resume folder backup**
 once.
 
-Shortcuts: **Ctrl/Cmd+S** save, **Ctrl/Cmd+Shift+P** preview, **Ctrl/Cmd+B / I / K** bold,
-italic, link, **Esc** close panels.
+**Zen mode:** click **Zen** (or press **Ctrl/Cmd+.**) and everything but your words disappears,
+full screen where the browser allows it. Press **Esc** to come back. On a phone or tablet, tap
+the faint ✕ in the top corner.
+
+Shortcuts: **Ctrl/Cmd+S** save, **Ctrl/Cmd+.** zen, **Ctrl/Cmd+Shift+P** preview,
+**Ctrl/Cmd+B / I / K** bold, italic, link, **Esc** leave zen or close panels.
 
 **In files:** create `src/content/blog/my-essay.md` with this frontmatter, then push:
 

@@ -10,6 +10,7 @@ import { renderMarkdown } from '../preview';
 import { uploadImage } from '../images';
 import { distributionPanel } from './distribution';
 import { historyPanel } from './history';
+import { autosize, keepCaretVisible } from '../autosize';
 import { snapshot, rekey, stamp, downloadText, type VersionReason } from '../backup';
 import { folderStatus, folderName, resumeFolder, writeLive, writeHistory, onFolderChange } from '../folder';
 import { AUTORESTORE_KEY } from './backups';
@@ -77,6 +78,9 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
   const previewBtn = h('button', { class: 'btn btn-ghost', type: 'button', 'aria-pressed': 'false', onclick: () => togglePreview() }, 'Preview');
   let font: Font = (localStorage.getItem('studio:font') as Font) || 'serif';
   const fontBtn = h('button', { class: 'btn btn-ghost', type: 'button', title: 'Change font', onclick: () => cycleFont() }, 'Aa');
+  const zenBtn = h('button', { class: 'btn btn-ghost', type: 'button', title: 'Zen mode: only your words (Esc to leave)', onclick: () => setZen(true) }, 'Zen');
+  const zenHint = h('div', { class: 'zen-hint', 'aria-live': 'polite' });
+  const zenExit = h('button', { class: 'zen-exit', type: 'button', 'aria-label': 'Leave zen mode', onclick: () => setZen(false) }, '✕');
 
   titleEl.value = doc.data.title;
   bodyEl.value = doc.body;
@@ -338,6 +342,7 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
       h('span', { class: 'ed-spacer' }),
       h('span', { class: 'hide-sm' }, themeButton()),
       fontBtn,
+      zenBtn,
       previewBtn,
       h('button', { class: 'btn btn-ghost', type: 'button', onclick: () => (drawer.hidden ? openDrawer() : closeDrawer()) }, 'Settings'),
       saveBtn,
@@ -346,14 +351,15 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
     banner,
     h('main', { class: 'ed-page' }, titleEl, bodyEl, previewEl),
     h('footer', { class: 'ed-bar ed-bottom' }, countEl, h('span', { class: 'ed-spacer' }), backupEl, stateEl),
-    drawer
+    drawer,
+    zenHint,
+    zenExit
   );
   clear(root, rootEl);
 
   // ── Behaviour ───────────────────────────────────────────────
   function grow(el: HTMLTextAreaElement) {
-    el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
+    autosize(el);
   }
 
   function current(): string {
@@ -496,6 +502,39 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
     rootEl.classList.remove('typing');
     clearTimeout(idleTimer);
   }
+
+  // Zen mode: nothing on screen but the title and the text. Esc leaves.
+  let zen = false;
+  let zenHintTimer: number | undefined;
+  function setZen(on: boolean) {
+    if (on === zen) return;
+    zen = on;
+    if (on) {
+      if (!previewEl.hidden) togglePreview(false);
+      closeDrawer();
+      rootEl.classList.add('zen');
+      document.documentElement.classList.add('zen-root');
+      // Full screen hides the browser too. Not every device allows it; zen works without it.
+      document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }).catch(() => {});
+      zenHint.textContent = 'Zen mode · press Esc to leave';
+      zenHint.classList.add('show');
+      clearTimeout(zenHintTimer);
+      zenHintTimer = window.setTimeout(() => zenHint.classList.remove('show'), 2200);
+      (document.activeElement === titleEl ? titleEl : bodyEl).focus({ preventScroll: true });
+    } else {
+      rootEl.classList.remove('zen');
+      document.documentElement.classList.remove('zen-root');
+      zenHint.classList.remove('show');
+      if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+    }
+    try {
+      localStorage.setItem('studio:zen', on ? '1' : '0');
+    } catch {}
+  }
+  // In full screen, the browser uses the first Esc to leave full screen, so follow it.
+  const onFullscreen = () => {
+    if (!document.fullscreenElement && zen) setZen(false);
+  };
 
   function togglePreview(force?: boolean) {
     const on = force ?? previewEl.hidden;
@@ -755,6 +794,7 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
   });
   bodyEl.addEventListener('input', () => {
     grow(bodyEl);
+    keepCaretVisible(bodyEl, zen ? { top: 40, bottom: 80 } : undefined);
     changed();
   });
   bodyEl.addEventListener('keydown', (e) => {
@@ -796,8 +836,12 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
     } else if (mod && e.shiftKey && e.key.toLowerCase() === 'p') {
       e.preventDefault();
       togglePreview();
+    } else if (mod && e.key === '.') {
+      e.preventDefault();
+      setZen(!zen);
     } else if (e.key === 'Escape') {
-      if (!drawer.hidden) closeDrawer();
+      if (zen) setZen(false);
+      else if (!drawer.hidden) closeDrawer();
       else if (!previewEl.hidden) togglePreview(false);
     }
   };
@@ -807,6 +851,7 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
   };
   window.addEventListener('keydown', onKey);
   window.addEventListener('mousemove', onMove);
+  document.addEventListener('fullscreenchange', onFullscreen);
   window.addEventListener('beforeunload', onUnload);
   document.addEventListener('visibilitychange', onHide);
   window.addEventListener('pagehide', onHide);
@@ -828,6 +873,8 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
     window.removeEventListener('pagehide', onHide);
     window.removeEventListener('keydown', onKey);
     window.removeEventListener('mousemove', onMove);
+    document.removeEventListener('fullscreenchange', onFullscreen);
+    if (zen) setZen(false);
     window.removeEventListener('beforeunload', onUnload);
     document.title = 'Studio';
   };
