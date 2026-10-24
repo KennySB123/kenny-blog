@@ -1,7 +1,10 @@
 ---
 title: What do people not know?
+description: My thoughts about the shared cultural knowledge that underpins our day to day lives in ways we rarely think about.
 pubDate: 2026-10-24
-tags: []
+tags:
+  - knowledge
+  - beliefs
 draft: true
 ---
 
