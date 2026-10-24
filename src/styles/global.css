@@ -449,6 +449,97 @@ main { flex: 1 0 auto; padding-block: 2.5rem 5rem; }
 }
 .post-nav a { font-weight: 600; }
 
+/* Essay extras: contents list, drop cap, video, syndication links */
+.toc {
+  max-width: var(--measure);
+  margin: 0 0 2rem;
+  padding: 0.9rem 1.2rem;
+  background: var(--bg-raised);
+  border: 2px solid var(--text);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.toc summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.toc ol { margin: 0.6rem 0 0; padding-left: 1.3rem; }
+.toc li { margin: 0.2rem 0; }
+
+.prose-essay { font-size: 1.1rem; line-height: 1.78; }
+.prose-essay > p:first-of-type::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 3.6em;
+  line-height: 0.85;
+  padding: 0.08em 0.1em 0 0;
+  color: var(--accent);
+  font-variation-settings: 'SOFT' 100, 'WONK' 1;
+}
+
+.prose .footnotes { font-size: 0.92rem; color: var(--text-muted); }
+
+.video-embed {
+  position: relative;
+  max-width: var(--measure);
+  aspect-ratio: 16 / 9;
+  margin: 0 0 2rem;
+  border: 2px solid var(--text);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background: var(--bg-sunken);
+}
+.video-embed iframe { width: 100%; height: 100%; border: 0; display: block; }
+.video-embed-button {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+.video-embed-button img { width: 100%; height: 100%; object-fit: cover; }
+.video-embed-play {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg-raised);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease;
+}
+.video-embed-play svg { width: 2rem; height: 2rem; }
+.video-embed-button:hover .video-embed-play,
+.video-embed-button:focus-visible .video-embed-play { transform: translate(-50%, -50%) scale(1.08); }
+.video-embed-label {
+  position: absolute;
+  left: 1rem;
+  bottom: 0.8rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 999px;
+  background: var(--bg-raised);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.also-on {
+  max-width: var(--measure);
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 2px dashed var(--border);
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
 /* ═══════════════════════════════════════════════════════════
    Archive / tags index
    ═══════════════════════════════════════════════════════════ */

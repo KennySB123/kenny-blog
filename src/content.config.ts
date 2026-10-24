@@ -11,6 +11,11 @@ const blog = defineCollection({
     heroImage: z.string().optional(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    // Per-post overrides for where and how this essay is distributed.
+    // Keys are platform ids (devto, hashnode, bluesky, mastodon, youtube).
+    // Anything not set here falls back to src/data/distribution.json.
+    // Written by the /admin editor; safe to edit by hand.
+    distribute: z.record(z.string(), z.record(z.string(), z.any())).optional(),
   }),
 });
 

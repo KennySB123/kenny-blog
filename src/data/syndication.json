@@ -1,0 +1,32 @@
+{
+  "posts": {
+    "hello-world": {
+      "devto": {
+        "skipped": "Missing secret DEVTO_API_KEY"
+      },
+      "hashnode": {
+        "skipped": "Missing secret HASHNODE_TOKEN, HASHNODE_PUBLICATION_ID"
+      },
+      "bluesky": {
+        "skipped": "Missing secret BLUESKY_HANDLE, BLUESKY_APP_PASSWORD"
+      },
+      "mastodon": {
+        "skipped": "Missing secret MASTODON_INSTANCE, MASTODON_TOKEN"
+      }
+    },
+    "how-i-write-posts": {
+      "devto": {
+        "skipped": "Missing secret DEVTO_API_KEY"
+      },
+      "hashnode": {
+        "skipped": "Missing secret HASHNODE_TOKEN, HASHNODE_PUBLICATION_ID"
+      },
+      "bluesky": {
+        "skipped": "Missing secret BLUESKY_HANDLE, BLUESKY_APP_PASSWORD"
+      },
+      "mastodon": {
+        "skipped": "Missing secret MASTODON_INSTANCE, MASTODON_TOKEN"
+      }
+    }
+  }
+}

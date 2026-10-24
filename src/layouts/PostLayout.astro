@@ -2,16 +2,29 @@
 import BaseLayout from './BaseLayout.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Comments from '../components/Comments.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+import VideoEmbed from '../components/VideoEmbed.astro';
 import type { CollectionEntry } from 'astro:content';
+import type { MarkdownHeading } from 'astro';
+import { countWords, readingMinutes } from '../utils/reading';
+import { getSyndication } from '../utils/distribution';
 
 interface Props {
   post: CollectionEntry<'blog'>;
   prev?: { id: string; title: string } | null;
   next?: { id: string; title: string } | null;
+  headings?: MarkdownHeading[];
 }
 
-const { post, prev = null, next = null } = Astro.props;
+const { post, prev = null, next = null, headings = [] } = Astro.props;
 const { title, description, pubDate, updatedDate, heroImage, tags, draft } = post.data;
+
+const words = countWords(post.body);
+const minutes = readingMinutes(post.body);
+// Long pieces get a contents list and the essay treatment (drop cap, roomier type).
+const isEssay = words >= 1200;
+const showToc = isEssay && headings.filter((h) => h.depth === 2).length >= 3;
+const syndication = getSyndication(post.id);
 ---
 
 <BaseLayout title={title} description={description}>
@@ -20,6 +33,7 @@ const { title, description, pubDate, updatedDate, heroImage, tags, draft } = pos
       <span class="card-meta">
         <FormattedDate date={pubDate} />
         {updatedDate && <> · updated <FormattedDate date={updatedDate} /></>}
+        <span> · {minutes} min read</span>
         {draft && <span class="draft-badge">Draft</span>}
       </span>
 
@@ -37,9 +51,25 @@ const { title, description, pubDate, updatedDate, heroImage, tags, draft } = pos
 
     {heroImage && <img class="hero-image" src={heroImage} alt="" loading="eager" />}
 
-    <div class="prose">
+    {syndication.youtubeId && <VideoEmbed id={syndication.youtubeId} title={title} />}
+
+    {showToc && <TableOfContents headings={headings} />}
+
+    <div class:list={['prose', { 'prose-essay': isEssay }]}>
       <slot />
     </div>
+
+    {syndication.links.length > 0 && (
+      <p class="also-on">
+        Also published on{' '}
+        {syndication.links.map((l, i) => (
+          <>
+            {i > 0 && (i === syndication.links.length - 1 ? ' and ' : ', ')}
+            <a href={l.url} rel="noopener">{l.label}</a>
+          </>
+        ))}.
+      </p>
+    )}
   </article>
 
   {(prev || next) && (

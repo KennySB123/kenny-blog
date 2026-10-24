@@ -39,3 +39,10 @@ export const GISCUS = {
   category: 'Announcements',
   categoryId: '',
 };
+
+// ── Repository (used by the /admin editor and the pipeline) ──
+export const REPO = {
+  owner: 'KennySB123',
+  name: 'kenny-blog',
+  branch: 'main',
+};

@@ -1,0 +1,33 @@
+---
+// Privacy-friendly YouTube embed: shows the thumbnail, loads the player only on click.
+interface Props {
+  id: string;
+  title: string;
+}
+const { id, title } = Astro.props;
+---
+
+<div class="video-embed" data-video-id={id}>
+  <button type="button" class="video-embed-button" aria-label={`Play video: ${title}`}>
+    <img src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`} alt="" loading="lazy" width="480" height="360" />
+    <span class="video-embed-play" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"></path></svg>
+    </span>
+    <span class="video-embed-label">Watch the video version</span>
+  </button>
+</div>
+
+<script is:inline>
+  document.querySelectorAll('.video-embed').forEach(function (el) {
+    var btn = el.querySelector('button');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + el.dataset.videoId + '?autoplay=1&rel=0';
+      iframe.title = btn.getAttribute('aria-label') || 'Video';
+      iframe.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      el.replaceChildren(iframe);
+    });
+  });
+</script>

@@ -1,0 +1,37 @@
+{
+  "trigger": "on-publish",
+  "autoSince": "2026-10-24",
+  "updateMirrorsOnEdit": true,
+  "platforms": {
+    "devto": {
+      "enabled": true,
+      "publishAs": "published",
+      "series": ""
+    },
+    "hashnode": {
+      "enabled": true,
+      "publishAs": "published"
+    },
+    "bluesky": {
+      "enabled": true,
+      "template": "{title}\n\n{description}\n\n{tags}"
+    },
+    "mastodon": {
+      "enabled": true,
+      "template": "{title}\n\n{description}\n\n{url}\n\n{tags}",
+      "visibility": "public"
+    },
+    "youtube": {
+      "enabled": true,
+      "scriptStyle": "adapted",
+      "notes": "",
+      "voice": "af_heart",
+      "speed": 1,
+      "privacy": "private",
+      "playlistId": "",
+      "categoryId": "27",
+      "declareSynthetic": true,
+      "showOnSite": true
+    }
+  }
+}

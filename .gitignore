@@ -21,3 +21,11 @@ pnpm-debug.log*
 # editors
 .vscode/
 .idea/
+
+# pipeline (runs in GitHub Actions)
+pipeline/node_modules/
+pipeline/out/
+pipeline/.cache/
+
+# local Cloudflare dev
+.wrangler/

@@ -1,0 +1,88 @@
+# Renders approved video scripts into narrated read-along videos and uploads them
+# to YouTube. Runs when you approve a script in /admin (that commit changes
+# pipeline/jobs/<slug>/job.json), or by hand from the Actions tab.
+name: Video render
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'pipeline/jobs/**/job.json'
+  workflow_dispatch:
+    inputs:
+      slug:
+        description: Essay slug to render (blank = every approved job)
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: video-render
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Any approved jobs?
+        id: check
+        env:
+          INPUT_SLUG: ${{ inputs.slug }}
+        run: |
+          if [ -n "$INPUT_SLUG" ] || grep -lsq '"status": "approved"' pipeline/jobs/*/job.json; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No approved video jobs; nothing to render." >> "$GITHUB_STEP_SUMMARY"
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.run == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: pipeline/package-lock.json
+
+      - name: Install ffmpeg
+        if: steps.check.outputs.run == 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+
+      - name: Cache the voice model
+        if: steps.check.outputs.run == 'true'
+        uses: actions/cache@v4
+        with:
+          path: pipeline/.cache/huggingface
+          key: kokoro-82m-v1.0-q8
+
+      - name: Install pipeline
+        if: steps.check.outputs.run == 'true'
+        working-directory: pipeline
+        run: npm ci --no-audit --no-fund
+
+      - name: Render and upload
+        if: steps.check.outputs.run == 'true'
+        working-directory: pipeline
+        run: node src/video/render.mjs
+        env:
+          INPUT_SLUG: ${{ inputs.slug }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+
+      - name: Keep the video as a download
+        if: always() && steps.check.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: video
+          path: |
+            pipeline/out/*/video.mp4
+            pipeline/out/*/thumbnail.png
+            pipeline/out/*/captions.srt
+          if-no-files-found: ignore
+          retention-days: 14
