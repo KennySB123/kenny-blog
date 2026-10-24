@@ -607,13 +607,16 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
     if (opts.unpublish) doc.data.draft = true;
 
     if (opts.publish && prevDraft) {
-      const enabled = PLATFORMS.filter((p) => ({ ...store.settings.platforms[p], ...(doc.data.distribute?.[p] ?? {}) }).enabled !== false);
+      const on = PLATFORMS.filter((p) => ({ ...store.settings.platforms[p], ...(doc.data.distribute?.[p] ?? {}) }).enabled !== false);
+      const enabled = on.filter((p) => PLATFORM_INFO[p].kind !== 'manual');
+      const manualOn = on.filter((p) => PLATFORM_INFO[p].kind === 'manual');
+      const manualNote = manualOn.length ? ` ${manualOn.map((p) => PLATFORM_INFO[p].label).join(' and ')} wait for you in Settings → Distribution, ready to paste.` : '';
       const since = store.settings.autoSince;
       const auto = store.settings.trigger === 'on-publish' && !(since && doc.data.pubDate < since);
       const ok = await dialog({
         title: 'Publish this essay?',
         body: auto && enabled.length
-          ? `It goes live on the site in about a minute. Then it goes to: ${enabled.map((p) => PLATFORM_INFO[p].label).join(', ')}.${enabled.includes('youtube') ? ' The video waits for you to approve its script.' : ''}`
+          ? `It goes live on the site in about a minute. Then it goes to: ${enabled.map((p) => PLATFORM_INFO[p].label).join(', ')}.${enabled.includes('youtube') ? ' The video waits for you to approve its script.' : ''}${manualNote}`
           : 'It goes live on the site in about a minute.' +
             (auto
               ? ''
@@ -694,7 +697,7 @@ export function editorView(root: HTMLElement, slug: string | null): () => void {
   async function remove() {
     if (!doc.path || !doc.slug) return;
     const entry = store.ledger.posts[doc.slug] ?? {};
-    const live = PLATFORMS.filter((p) => entry[p]?.id && !entry[p]?.removed);
+    const live = PLATFORMS.filter((p) => PLATFORM_INFO[p].kind !== 'manual' && entry[p]?.id && !entry[p]?.removed);
     const choice = await dialog({
       title: 'Delete this essay?',
       body: 'This removes it from the site. You can still recover it from the Git history.',

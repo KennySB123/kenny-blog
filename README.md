@@ -4,8 +4,8 @@ A fast, free, fully-owned essay blog. Static site built with
 [Astro](https://astro.build), written in Markdown, hosted on
 [Cloudflare Pages](https://pages.cloudflare.com) for **£0/month**. Write in a quiet
 browser editor (the Studio at `/admin`) or as plain Markdown files. Each essay can go out
-to DEV, Hashnode, Bluesky and Mastodon, and become a narrated YouTube video, from one
-click.
+to DEV, Hashnode, Bluesky, Mastodon and X, and become a narrated YouTube video, from one
+click. Medium and Substack get a ready-to-paste version.
 
 ## What's included
 

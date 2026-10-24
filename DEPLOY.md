@@ -186,8 +186,22 @@ Studio shows "Missing secret …" next to it.
 | Hashnode | `HASHNODE_TOKEN`, `HASHNODE_PUBLICATION_ID` | Token: <https://hashnode.com/settings/developer>. Publication ID: open your blog dashboard; it is the id in the URL `hashnode.com/<id>/dashboard` |
 | Bluesky | `BLUESKY_HANDLE`, `BLUESKY_APP_PASSWORD` | Handle like `kenny.bsky.social`. App password: Bluesky → Settings → Privacy and security → App passwords |
 | Mastodon | `MASTODON_INSTANCE`, `MASTODON_TOKEN` | Instance like `mastodon.social`. Token: your instance → Preferences → Development → New application, scope `write:statuses` → copy "Your access token" |
+| X | `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_TOKEN_SECRET` | <https://developer.x.com> → Developer Console → create an app. In its **User authentication settings**, set permissions to **Read and write** first. Then under **Keys and tokens**, copy the API key and secret and generate the access token and secret. X bills per post from prepaid credits you add in the console (reported at about $0.20 for a post with a link; check the console for current prices) |
 | Video scripts | `ANTHROPIC_API_KEY` | <https://console.anthropic.com> → API keys. Not needed if you choose the "word for word" script style |
 | YouTube | `YOUTUBE_CLIENT_ID`, `YOUTUBE_CLIENT_SECRET`, `YOUTUBE_REFRESH_TOKEN` | See Step 8 |
+
+**Medium and Substack** need no keys. Neither lets new apps post automatically (Medium stopped
+issuing API access; Substack has no public posting API, and its terms restrict tools that reuse
+your login). So the Studio does the preparation and you do the final click:
+
+- **Medium:** in an essay's **Settings → Distribution**, click **Copy essay link**, then **Open
+  Medium import**. Paste the link and press Import. Medium's own import keeps the link back to
+  your site, so search engines treat your site as the original.
+- **Substack:** set your Substack address once in **Distribution** settings. Then in an essay,
+  click **Open Substack editor**, **Copy title** and **Copy essay**. The essay pastes with its
+  headings, links and images.
+- After posting, paste the post's address into **Mark as posted**. The essay then lists Medium or
+  Substack under "Also published on". The essay list reminds you which essays are still waiting.
 
 Then choose the defaults in the Studio under **Distribution**: what is on, when it happens, the
 text of social posts, the voice and privacy of videos.
@@ -298,7 +312,8 @@ Pushing a published essay runs the same distribution as the Studio.
 | Platform | What it gets | On later edits |
 |---|---|---|
 | DEV, Hashnode | The full essay, with a canonical link back to your site | Updated (you can turn this off) |
-| Bluesky, Mastodon | One announcement post with a link | Never posted again |
+| Bluesky, Mastodon, X | One announcement post with a link | Never posted again |
+| Medium, Substack | Prepared for you to paste in one or two clicks | Not changed |
 | YouTube | A narrated read-along video, after you approve the script | Not changed |
 
 Every result (links, errors, skips) is written to `src/data/syndication.json` and shown in the

@@ -11,10 +11,11 @@ import * as devto from './platforms/devto.mjs';
 import * as hashnode from './platforms/hashnode.mjs';
 import * as bluesky from './platforms/bluesky.mjs';
 import * as mastodon from './platforms/mastodon.mjs';
+import * as x from './platforms/x.mjs';
 import { deleteVideo } from './video/youtube.mjs';
 
-const ADAPTERS = { devto, hashnode, bluesky, mastodon };
-const LABELS = { devto: 'DEV', hashnode: 'Hashnode', bluesky: 'Bluesky', mastodon: 'Mastodon', youtube: 'YouTube' };
+const ADAPTERS = { devto, hashnode, bluesky, mastodon, x };
+const LABELS = { devto: 'DEV', hashnode: 'Hashnode', bluesky: 'Bluesky', mastodon: 'Mastodon', x: 'X', youtube: 'YouTube' };
 
 function changedPosts() {
   const before = process.env.BEFORE_SHA;

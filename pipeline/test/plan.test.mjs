@@ -7,7 +7,7 @@ import { fakePost } from './helpers.mjs';
 const settings = (over = {}) => ({
   trigger: 'on-publish',
   updateMirrorsOnEdit: true,
-  platforms: { devto: { enabled: true }, hashnode: { enabled: true }, bluesky: { enabled: true }, mastodon: { enabled: true }, youtube: { enabled: true } },
+  platforms: { devto: { enabled: true }, hashnode: { enabled: true }, bluesky: { enabled: true }, mastodon: { enabled: true }, x: { enabled: true }, youtube: { enabled: true } },
   ...over,
 });
 const noJob = () => ({ job: null });
@@ -15,7 +15,7 @@ const ops = (r) => r.tasks.map((t) => `${t.platform}:${t.op}`).sort();
 
 test('new published post goes everywhere that is on', () => {
   const r = plan({ event: 'push', changed: [{ slug: 'on-walking' }], settings: settings(), ledger: { posts: {} }, readPost: () => fakePost(), readJob: noJob });
-  assert.deepEqual(ops(r), ['bluesky:publish', 'devto:publish', 'hashnode:publish', 'mastodon:publish', 'youtube:script']);
+  assert.deepEqual(ops(r), ['bluesky:publish', 'devto:publish', 'hashnode:publish', 'mastodon:publish', 'x:publish', 'youtube:script']);
 });
 
 test('drafts are skipped', () => {
@@ -24,14 +24,14 @@ test('drafts are skipped', () => {
 });
 
 test('per-post override switches a platform off', () => {
-  const post = fakePost({ distribute: { mastodon: { enabled: false }, youtube: { enabled: false } } });
+  const post = fakePost({ distribute: { mastodon: { enabled: false }, x: { enabled: false }, youtube: { enabled: false } } });
   const r = plan({ event: 'push', changed: [{ slug: 'on-walking' }], settings: settings(), ledger: { posts: {} }, readPost: () => post, readJob: noJob });
   assert.deepEqual(ops(r), ['bluesky:publish', 'devto:publish', 'hashnode:publish']);
 });
 
 test('edits update mirrors only when content changed, never re-announce', () => {
   const post = fakePost();
-  const ledger = { posts: { 'on-walking': { devto: { id: 1, hash: 'old' }, hashnode: { id: 'h', hash: contentHash(post) }, bluesky: { id: 'at://x' }, mastodon: { id: '9' }, youtube: { id: 'yt' } } } };
+  const ledger = { posts: { 'on-walking': { devto: { id: 1, hash: 'old' }, hashnode: { id: 'h', hash: contentHash(post) }, bluesky: { id: 'at://x' }, mastodon: { id: '9' }, x: { id: '1' }, youtube: { id: 'yt' } } } };
   const r = plan({ event: 'push', changed: [{ slug: 'on-walking' }], settings: settings(), ledger, readPost: () => post, readJob: noJob });
   assert.deepEqual(ops(r), ['devto:update']);
 });
@@ -47,7 +47,7 @@ test('manual trigger: push does nothing new, dispatch sends it', () => {
   const push = plan({ event: 'push', changed: [{ slug: 'on-walking' }], settings: s, ledger: { posts: {} }, readPost: () => fakePost(), readJob: noJob });
   assert.equal(push.tasks.length, 0);
   const dispatch = plan({ event: 'dispatch', input: { slug: 'on-walking', action: 'distribute', platforms: [] }, settings: s, ledger: { posts: {} }, readPost: () => fakePost(), readJob: noJob });
-  assert.equal(dispatch.tasks.length, 5);
+  assert.equal(dispatch.tasks.length, 6);
 });
 
 test('dispatch with platforms retries just those', () => {
@@ -78,7 +78,7 @@ test('autoSince protects older essays from automatic sends', () => {
   const push = plan({ event: 'push', changed: [{ slug: 'on-walking' }], settings: s, ledger: { posts: {} }, readPost: () => old, readJob: noJob });
   assert.equal(push.tasks.length, 0);
   const fresh = plan({ event: 'push', changed: [{ slug: 'on-walking' }], settings: s, ledger: { posts: {} }, readPost: () => fakePost({ pubDate: '2026-10-25' }), readJob: noJob });
-  assert.equal(fresh.tasks.length, 5);
+  assert.equal(fresh.tasks.length, 6);
   const manual = plan({ event: 'dispatch', input: { slug: 'on-walking', action: 'distribute', platforms: [] }, settings: s, ledger: { posts: {} }, readPost: () => old, readJob: noJob });
-  assert.equal(manual.tasks.length, 5);
+  assert.equal(manual.tasks.length, 6);
 });

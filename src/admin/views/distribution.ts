@@ -6,6 +6,7 @@ import { renderField, toggle } from './fields';
 import { platformStatus } from './status';
 import { dispatchDistribute, updateJson } from '../github';
 import { PATHS } from '../config';
+import { essayUrl, essayHtml, copyRich, copyText, substackEditorUrl, MEDIUM_IMPORT_URL, markPosted } from '../manual';
 
 interface Ctx {
   slug: () => string | null;
@@ -94,7 +95,8 @@ export function distributionPanel(ctx: Ctx) {
               : null
           ),
           p === 'youtube' && slug ? videoExtras(slug) : null,
-          options
+          info.kind === 'manual' && enabled ? manualExtras(p, slug) : null,
+          info.fields.length ? options : null
         );
       }),
       h(
@@ -132,6 +134,98 @@ export function distributionPanel(ctx: Ctx) {
         }
       }),
       entry.privacy === 'private' ? h('p', { class: 'hint' }, 'The video is private. Make it public in YouTube Studio before showing it here.') : null
+    );
+  }
+
+  // Medium and Substack: no posting API, so prepare everything and let you post it.
+  function manualExtras(p: Platform, slug: string | null) {
+    if (!slug || !ctx.isLive()) return h('p', { class: 'hint' }, 'Publish the essay first. Then the buttons to post it here appear.');
+    const posted = store.ledger.posts[slug]?.[p]?.url;
+    const urlInput = h('input', { class: 'input', type: 'url', placeholder: p === 'medium' ? 'https://medium.com/@you/…' : 'https://you.substack.com/p/…', 'aria-label': `${PLATFORM_INFO[p].label} address` });
+    const save = async () => {
+      const url = urlInput.value.trim();
+      if (!/^https?:\/\//.test(url)) return toast('Paste the full address of the post, starting with https://', 'error');
+      try {
+        await markPosted(slug, p, url);
+        toast(`Saved. "Also published on" will list ${PLATFORM_INFO[p].label} after the next build.`, 'ok');
+        render();
+      } catch (e) {
+        toast(errorMessage(e), 'error');
+      }
+    };
+    if (posted)
+      return h(
+        'p',
+        { class: 'hint' },
+        h(
+          'button',
+          {
+            class: 'linklike',
+            type: 'button',
+            onclick: async () => {
+              try {
+                await markPosted(slug, p, null);
+                render();
+              } catch (e) {
+                toast(errorMessage(e), 'error');
+              }
+            },
+          },
+          'Clear this link'
+        )
+      );
+
+    const steps =
+      p === 'medium'
+        ? h(
+            'div',
+            { class: 'stack-sm' },
+            h('p', { class: 'hint' }, '1. Copy the essay link. 2. Open Medium\'s import page and paste it. 3. Check the story and publish it on Medium.'),
+            h(
+              'div',
+              { class: 'input-row' },
+              h('button', { class: 'btn btn-small', type: 'button', onclick: async () => toast((await copyText(essayUrl(slug))) ? 'Essay link copied.' : 'Could not copy. Select the link from your address bar instead.', 'ok') }, 'Copy essay link'),
+              h('a', { class: 'btn btn-small btn-primary', href: MEDIUM_IMPORT_URL, target: '_blank', rel: 'noopener' }, 'Open Medium import ↗')
+            )
+          )
+        : (() => {
+            const editor = substackEditorUrl(effective(store.settings, ctx.overrides(), 'substack').publication);
+            const pack = () => essayHtml(slug);
+            return h(
+              'div',
+              { class: 'stack-sm' },
+              h('p', { class: 'hint' }, '1. Open the editor. 2. Copy the title and paste it into the title box. 3. Copy the essay and paste it into the body. Images and formatting come with it. 4. Check it, then publish or send.'),
+              ctx.isDirty() ? h('p', { class: 'hint' }, 'You have unsaved changes. The copy uses the last saved version.') : null,
+              h(
+                'div',
+                { class: 'input-row' },
+                editor
+                  ? h('a', { class: 'btn btn-small btn-primary', href: editor, target: '_blank', rel: 'noopener' }, 'Open Substack editor ↗')
+                  : h('span', { class: 'hint' }, 'Add your Substack address under Options, or in Distribution settings, to get an editor button.'),
+                h('button', { class: 'btn btn-small', type: 'button', onclick: async () => toast((await copyText(pack()?.title ?? '')) ? 'Title copied.' : 'Could not copy the title.', 'ok') }, 'Copy title'),
+                h(
+                  'button',
+                  {
+                    class: 'btn btn-small',
+                    type: 'button',
+                    onclick: async () => {
+                      const e = pack();
+                      if (!e) return;
+                      toast((await copyRich(e.html, e.text)) ? 'Essay copied with formatting. Paste it into the Substack body.' : 'Could not copy the essay.', 'ok');
+                    },
+                  },
+                  'Copy essay'
+                )
+              )
+            );
+          })();
+
+    return h(
+      'div',
+      { class: 'stack-sm manual-steps' },
+      steps,
+      h('label', { class: 'hint' }, `Posted it? Paste its ${PLATFORM_INFO[p].label} address so the essay can link to it:`),
+      h('div', { class: 'input-row' }, urlInput, h('button', { class: 'btn btn-small', type: 'button', onclick: save }, 'Mark as posted'))
     );
   }
 

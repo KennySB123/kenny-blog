@@ -17,9 +17,9 @@ export const PATHS = {
   out: path.join(PIPELINE_ROOT, 'out'),
 };
 
-export const PLATFORMS = ['devto', 'hashnode', 'bluesky', 'mastodon', 'youtube'];
+export const PLATFORMS = ['devto', 'hashnode', 'bluesky', 'mastodon', 'x', 'youtube'];
 export const MIRRORS = ['devto', 'hashnode'];
-export const ANNOUNCERS = ['bluesky', 'mastodon'];
+export const ANNOUNCERS = ['bluesky', 'mastodon', 'x'];
 
 function read(p) {
   return fs.readFileSync(p, 'utf8');
@@ -79,6 +79,7 @@ export const SECRETS = {
   hashnode: ['HASHNODE_TOKEN', 'HASHNODE_PUBLICATION_ID'],
   bluesky: ['BLUESKY_HANDLE', 'BLUESKY_APP_PASSWORD'],
   mastodon: ['MASTODON_INSTANCE', 'MASTODON_TOKEN'],
+  x: ['X_API_KEY', 'X_API_SECRET', 'X_ACCESS_TOKEN', 'X_ACCESS_TOKEN_SECRET'],
   youtube: ['YOUTUBE_CLIENT_ID', 'YOUTUBE_CLIENT_SECRET', 'YOUTUBE_REFRESH_TOKEN'],
   claude: ['ANTHROPIC_API_KEY'],
 };

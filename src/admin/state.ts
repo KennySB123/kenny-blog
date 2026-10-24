@@ -51,6 +51,9 @@ export const DEFAULT_SETTINGS: DistributionSettings = {
     hashnode: { enabled: true },
     bluesky: { enabled: true },
     mastodon: { enabled: true },
+    x: { enabled: true },
+    medium: { enabled: true },
+    substack: { enabled: true },
     youtube: { enabled: true },
   },
 };

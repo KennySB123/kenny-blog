@@ -14,6 +14,11 @@ export interface PlatformStatus {
 export function platformStatus(slug: string, p: Platform, enabled: boolean): PlatformStatus {
   const entry: LedgerEntry | undefined = store.ledger.posts[slug]?.[p];
   if (p === 'youtube') return videoStatus(slug, enabled, entry);
+  if (PLATFORM_INFO[p].kind === 'manual') {
+    if (entry?.url) return { kind: 'done', text: 'Posted', url: entry.url };
+    if (!enabled) return { kind: 'off', text: 'Off' };
+    return { kind: 'action', text: 'Ready for you to post' };
+  }
   if (entry?.removed) return { kind: 'off', text: 'Removed' };
   if (entry?.url) return { kind: 'done', text: 'Live', url: entry.url };
   if (entry?.error) return { kind: 'error', text: `Failed: ${entry.error}` };
@@ -53,7 +58,7 @@ export function statusDots(slug: string, overrides: Record<string, any> | undefi
     PLATFORMS.map((p) => {
       const on = effective(store.settings, overrides, p).enabled !== false;
       const st = platformStatus(slug, p, on);
-      return h('span', { class: `dot dot-${st.kind}`, title: `${PLATFORM_INFO[p].label}: ${st.text}` }, PLATFORM_INFO[p].label.slice(0, 1));
+      return h('span', { class: `dot dot-${st.kind}`, title: `${PLATFORM_INFO[p].label}: ${st.text}` }, PLATFORM_INFO[p].short);
     })
   );
 }

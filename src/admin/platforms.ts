@@ -1,6 +1,6 @@
 // Platform metadata and the option fields the editor and settings page render.
 
-export const PLATFORMS = ['devto', 'hashnode', 'bluesky', 'mastodon', 'youtube'] as const;
+export const PLATFORMS = ['devto', 'hashnode', 'medium', 'substack', 'bluesky', 'mastodon', 'x', 'youtube'] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
 export type FieldType = 'select' | 'text' | 'textarea' | 'number' | 'checkbox';
@@ -18,7 +18,10 @@ export interface Field {
 
 export interface PlatformInfo {
   label: string;
-  kind: 'mirror' | 'announce' | 'video';
+  /** One or two letters for the status dots in the essay list. */
+  short: string;
+  /** manual: no API allows it, so the Studio prepares it and you post it in one or two clicks. */
+  kind: 'mirror' | 'announce' | 'video' | 'manual';
   blurb: string;
   secrets: string[];
   fields: Field[];
@@ -42,6 +45,7 @@ export const VOICES: [string, string][] = [
 export const PLATFORM_INFO: Record<Platform, PlatformInfo> = {
   devto: {
     label: 'DEV',
+    short: 'D',
     kind: 'mirror',
     blurb: 'Full copy of the essay on dev.to, with a canonical link back here.',
     secrets: ['DEVTO_API_KEY'],
@@ -60,6 +64,7 @@ export const PLATFORM_INFO: Record<Platform, PlatformInfo> = {
   },
   hashnode: {
     label: 'Hashnode',
+    short: 'H',
     kind: 'mirror',
     blurb: 'Full copy on your Hashnode blog, with a canonical link back here.',
     secrets: ['HASHNODE_TOKEN', 'HASHNODE_PUBLICATION_ID'],
@@ -75,8 +80,25 @@ export const PLATFORM_INFO: Record<Platform, PlatformInfo> = {
       },
     ],
   },
+  medium: {
+    label: 'Medium',
+    short: 'Me',
+    kind: 'manual',
+    blurb: 'Medium no longer lets new apps post. The Studio copies the essay link and opens Medium\'s own import tool, which keeps the link back to your site. Then you mark it as posted.',
+    secrets: [],
+    fields: [],
+  },
+  substack: {
+    label: 'Substack',
+    short: 'S',
+    kind: 'manual',
+    blurb: 'Substack has no way to post automatically. The Studio copies the title and the formatted essay and opens your Substack editor. Paste, check, send.',
+    secrets: [],
+    fields: [{ key: 'publication', label: 'Your Substack address', type: 'text', hint: 'For example kenny.substack.com, or your custom domain.' }],
+  },
   bluesky: {
     label: 'Bluesky',
+    short: 'B',
     kind: 'announce',
     blurb: 'One post announcing the essay, with a link card. Never repeated on edits.',
     secrets: ['BLUESKY_HANDLE', 'BLUESKY_APP_PASSWORD'],
@@ -84,6 +106,7 @@ export const PLATFORM_INFO: Record<Platform, PlatformInfo> = {
   },
   mastodon: {
     label: 'Mastodon',
+    short: 'M',
     kind: 'announce',
     blurb: 'One toot announcing the essay. Never repeated on edits.',
     secrets: ['MASTODON_INSTANCE', 'MASTODON_TOKEN'],
@@ -101,8 +124,20 @@ export const PLATFORM_INFO: Record<Platform, PlatformInfo> = {
       },
     ],
   },
+  x: {
+    label: 'X',
+    short: 'X',
+    kind: 'announce',
+    blurb: 'One post announcing the essay, through X\'s official API. X charges per post from prepaid credits (a post with a link costs more). Never repeated on edits.',
+    secrets: ['X_API_KEY', 'X_API_SECRET', 'X_ACCESS_TOKEN', 'X_ACCESS_TOKEN_SECRET'],
+    fields: [
+      { key: 'template', label: 'Post text', type: 'textarea', hint: `${TEMPLATE_HINT}. Max 280 characters; links count as 23.` },
+      { key: 'includeLink', label: 'Include the link (X charges more for posts with links)', type: 'checkbox' },
+    ],
+  },
   youtube: {
     label: 'YouTube',
+    short: 'Y',
     kind: 'video',
     blurb: 'Claude writes a narration script, you approve it here, then a read-along video renders and uploads.',
     secrets: ['ANTHROPIC_API_KEY', 'YOUTUBE_CLIENT_ID', 'YOUTUBE_CLIENT_SECRET', 'YOUTUBE_REFRESH_TOKEN'],

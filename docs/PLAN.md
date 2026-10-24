@@ -10,7 +10,7 @@ Setup steps are in [DEPLOY.md](../DEPLOY.md). Code orientation is in [CLAUDE.md]
 | Repository | Reuse `KennySB123/kenny-blog`. It already deploys to Cloudflare Pages. |
 | Repo visibility | Already public, so GitHub Actions minutes are unlimited. No change needed. |
 | Editing | A Studio at `/admin`, modelled on blank.page, with GitHub login. Replaces Sveltia CMS. |
-| Platforms | DEV, Hashnode, Bluesky, Mastodon, YouTube. LinkedIn removed. |
+| Platforms | DEV, Hashnode, Bluesky, Mastodon, X, YouTube automated. Medium and Substack assisted. LinkedIn removed. |
 | Control | Global defaults in the Studio, per-essay overrides saved in the essay's frontmatter. |
 | Voice | Kokoro (open-weight, free, runs on the Actions CPU). |
 | Narration | Claude adapts the essay; the user reviews and approves the script in the Studio. |
@@ -65,7 +65,13 @@ Studio (/admin, static page)  ──commits──▶  GitHub repo (main)
 | Bluesky | AT Protocol with an app password; link card image drawn by the pipeline. |
 | Mastodon | REST API; the instance builds the link card from the page. |
 | YouTube | Data API v3. Uploads stay private until Google audits the API project. |
-| Medium, Substack, X | Not automated (no usable API). Import by URL by hand if wanted. |
+| X | Official API v2 with OAuth 1.0a user keys. Paid per post from prepaid credits. |
+| Medium | No API for new apps. The Studio copies the link and opens Medium's own import tool, which keeps the canonical link. |
+| Substack | No public posting API; unofficial tools reuse your login, which its terms restrict. The Studio copies the title and formatted essay and opens your editor. |
+
+Fully hands-off posting to Medium or Substack would need a robot browser logged in as you. That
+breaks both sites' terms, tends to be blocked by their bot checks, and can get the account
+suspended, so it is deliberately not built.
 
 ## Running costs
 

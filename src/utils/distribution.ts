@@ -2,7 +2,7 @@ import ledger from '../data/syndication.json';
 import settings from '../data/distribution.json';
 
 /** Platform ids, in the order they appear in the UI. */
-export const PLATFORMS = ['devto', 'hashnode', 'bluesky', 'mastodon', 'youtube'] as const;
+export const PLATFORMS = ['devto', 'hashnode', 'medium', 'substack', 'bluesky', 'mastodon', 'x', 'youtube'] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
 export const PLATFORM_LABELS: Record<Platform, string> = {
@@ -10,6 +10,9 @@ export const PLATFORM_LABELS: Record<Platform, string> = {
   hashnode: 'Hashnode',
   bluesky: 'Bluesky',
   mastodon: 'Mastodon',
+  x: 'X',
+  medium: 'Medium',
+  substack: 'Substack',
   youtube: 'YouTube',
 };
 

@@ -1,7 +1,8 @@
 import { h, clear, formatDate } from '../dom';
 import { sortedPosts, store } from '../state';
 import { topbar } from './shell';
-import { statusDots } from './status';
+import { statusDots, platformStatus } from './status';
+import { PLATFORMS, PLATFORM_INFO, effective } from '../platforms';
 import { countWords } from '../../utils/reading';
 
 function hasLocalDraft(slug: string) {
@@ -17,6 +18,11 @@ export function listView(root: HTMLElement) {
   const list = h('ul', { class: 'post-list' });
 
   const reviewCount = [...store.jobs.values()].filter((j) => j.job?.status === 'review').length;
+  const manualWaiting = sortedPosts().filter(
+    (p) =>
+      !p.data.draft &&
+      PLATFORMS.some((pl) => PLATFORM_INFO[pl].kind === 'manual' && platformStatus(p.slug, pl, effective(store.settings, p.data.distribute as any, pl).enabled !== false).kind === 'action')
+  ).length;
 
   function render() {
     const q = search.value.trim().toLowerCase();
@@ -71,6 +77,7 @@ export function listView(root: HTMLElement) {
       ),
       hasLocalDraft('__new__') ? h('p', { class: 'notice' }, 'You have an unsaved new essay. ', h('a', { href: '#/new' }, 'Continue writing it')) : null,
       reviewCount > 0 ? h('p', { class: 'notice notice-accent' }, `${reviewCount} video script${reviewCount > 1 ? 's' : ''} waiting for your review.`) : null,
+      manualWaiting > 0 ? h('p', { class: 'notice' }, `${manualWaiting} essay${manualWaiting > 1 ? 's are' : ' is'} ready to post on Medium or Substack. Open it, then Settings → Distribution.`) : null,
       search,
       list
     )

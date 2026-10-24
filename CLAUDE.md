@@ -16,7 +16,9 @@ Around the site:
 - **Login functions** (`functions/api/auth/`): two Cloudflare Pages Functions that do the
   GitHub OAuth code exchange. The only server code; the Astro build stays static.
 - **Pipeline** (`pipeline/`): its own Node package, run by GitHub Actions. Syndicates essays
-  (DEV, Hashnode, Bluesky, Mastodon) and turns them into narrated YouTube videos.
+  (DEV, Hashnode, Bluesky, Mastodon, X) and turns them into narrated YouTube videos.
+  Medium and Substack are `manual` platforms: no API, so the Studio prepares a copy
+  (`src/admin/manual.ts`) and the user posts it and records the address in the ledger.
 
 ## Golden rules
 

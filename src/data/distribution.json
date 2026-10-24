@@ -21,6 +21,18 @@
       "template": "{title}\n\n{description}\n\n{url}\n\n{tags}",
       "visibility": "public"
     },
+    "x": {
+      "enabled": true,
+      "template": "{title}\n\n{description}\n\n{url}",
+      "includeLink": true
+    },
+    "medium": {
+      "enabled": true
+    },
+    "substack": {
+      "enabled": true,
+      "publication": ""
+    },
     "youtube": {
       "enabled": true,
       "scriptStyle": "adapted",
