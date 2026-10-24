@@ -27,7 +27,7 @@ const showToc = isEssay && headings.filter((h) => h.depth === 2).length >= 3;
 const syndication = getSyndication(post.id);
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description || undefined}>
   <article>
     <header class="post-header">
       <span class="card-meta">
@@ -38,7 +38,7 @@ const syndication = getSyndication(post.id);
       </span>
 
       <h1>{title}</h1>
-      <p class="lede">{description}</p>
+      {description && <p class="lede">{description}</p>}
 
       {tags.length > 0 && (
         <ul class="tag-list">

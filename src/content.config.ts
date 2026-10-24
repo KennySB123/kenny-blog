@@ -5,7 +5,8 @@ const blog = defineCollection({
   loader: glob({ base: './src/content/blog', pattern: '**/*.md' }),
   schema: z.object({
     title: z.string(),
-    description: z.string(),
+    // Optional so drafts can be saved before they have one; the Studio asks for it on publish.
+    description: z.string().default(''),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     heroImage: z.string().optional(),

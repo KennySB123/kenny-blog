@@ -15,7 +15,7 @@ const { title, description, pubDate, tags, draft } = post.data;
     {draft && <span class="draft-badge">Draft</span>}
   </span>
   <h2><a href={`/blog/${post.id}/`}>{title}</a></h2>
-  <p>{description}</p>
+  {description && <p>{description}</p>}
   {tags.length > 0 && (
     <ul class="tag-list">
       {tags.map((tag) => (
